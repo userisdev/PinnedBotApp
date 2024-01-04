@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PinnedBotApp
@@ -35,7 +36,7 @@ namespace PinnedBotApp
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
 
-            await Task.Delay(-1);
+            await Task.Delay(Timeout.Infinite);
         }
 
         /// <summary> Called when [log]. </summary>
@@ -43,7 +44,7 @@ namespace PinnedBotApp
         /// <returns> </returns>
         private Task OnLog(LogMessage log)
         {
-            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd} : {log}");
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : {log.Message}");
             return Task.CompletedTask;
         }
 
@@ -59,7 +60,7 @@ namespace PinnedBotApp
                 return;
             }
 
-            var message = await cachedMessage.GetOrDownloadAsync();
+            IUserMessage message = await cachedMessage.GetOrDownloadAsync();
             if (message is null)
             {
                 return;
@@ -72,6 +73,7 @@ namespace PinnedBotApp
             }
 
             await message.PinAsync();
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : pinned {message.Id}");
         }
 
         /// <summary> Called when [reaction removed asynchronous]. </summary>
@@ -86,7 +88,7 @@ namespace PinnedBotApp
                 return;
             }
 
-            var message = await cachedMessage.GetOrDownloadAsync();
+            IUserMessage message = await cachedMessage.GetOrDownloadAsync();
             if (message is null)
             {
                 return;
@@ -99,13 +101,14 @@ namespace PinnedBotApp
             }
 
             await message.UnpinAsync();
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : unpinned {message.Id}");
         }
 
         /// <summary> Called when [ready]. </summary>
         /// <returns> </returns>
         private Task OnReady()
         {
-            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd} :  is Running!!");
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : is Running!!");
             return Task.CompletedTask;
         }
     }

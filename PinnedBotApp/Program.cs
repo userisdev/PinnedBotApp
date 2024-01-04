@@ -11,14 +11,14 @@ namespace PinnedBotApp
         /// <param name="args"> The arguments. </param>
         private static async Task Main(string[] args)
         {
-            var token = args.FirstOrDefault();
+            string token = args.FirstOrDefault();
             if (string.IsNullOrEmpty(token))
             {
                 Console.WriteLine("token error.");
                 Environment.Exit(1);
             }
 
-            var bot = new PinnedBot(token);
+            PinnedBot bot = new PinnedBot(token);
             await bot.RunAsync();
             Environment.Exit(0);
         }
