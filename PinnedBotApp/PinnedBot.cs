@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -54,26 +55,42 @@ namespace PinnedBotApp
         /// <param name="reaction"> The reaction. </param>
         private async Task OnReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
-            // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを行う
-            if (reaction.Emote.Name != "📌")
-            {
-                return;
-            }
-
             IUserMessage message = await cachedMessage.GetOrDownloadAsync();
             if (message is null)
             {
                 return;
             }
 
-            // ボットが追加したリアクションでないことを確認
-            if (message.Author.IsBot)
+            // 強制削除機能
+            if (reaction.Emote.Name == "🔨")
             {
+                Emoji[] emojis = new[] { new Emoji("📌"), new Emoji("🔨") };
+                foreach (Emoji emoji in emojis)
+                {
+                    IEnumerable<IUser> users = await message.GetReactionUsersAsync(emoji, int.MaxValue).FlattenAsync();
+                    foreach (IUser user in users)
+                    {
+                        await message.RemoveReactionAsync(emoji, user);
+                        Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : removed {emoji.Name}/{user.Username}");
+                    }
+                }
+
+                await message.UnpinAsync();
+                Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : unpinned {message.Id}");
                 return;
             }
 
-            await message.PinAsync();
-            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : pinned {message.Id}");
+            // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを行う
+            if (reaction.Emote.Name == "📌")
+            {
+                if (!message.IsPinned)
+                {
+                    await message.PinAsync();
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : pinned {message.Id}");
+                }
+
+                return;
+            }
         }
 
         /// <summary> Called when [reaction removed asynchronous]. </summary>
@@ -82,26 +99,30 @@ namespace PinnedBotApp
         /// <param name="reaction"> The reaction. </param>
         private async Task OnReactionRemovedAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
-            // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを解除する
-            if (reaction.Emote.Name != "📌")
-            {
-                return;
-            }
-
             IUserMessage message = await cachedMessage.GetOrDownloadAsync();
             if (message is null)
             {
                 return;
             }
 
-            // ボットが追加したリアクションでないことを確認
-            if (message.Author.IsBot)
+            // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを解除する
+            if (reaction.Emote.Name == "📌")
             {
+                IEnumerable<IUser> users = await message.GetReactionUsersAsync(reaction.Emote, int.MaxValue).FlattenAsync();
+                foreach (IUser user in users)
+                {
+                    await message.RemoveReactionAsync(reaction.Emote, user);
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : removed {reaction.Emote.Name}/{user.Username}");
+                }
+
+                if (message.IsPinned)
+                {
+                    await message.UnpinAsync();
+                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : unpinned {message.Id}");
+                }
+
                 return;
             }
-
-            await message.UnpinAsync();
-            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : unpinned {message.Id}");
         }
 
         /// <summary> Called when [ready]. </summary>
