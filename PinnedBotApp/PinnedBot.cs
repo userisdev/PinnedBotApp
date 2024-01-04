@@ -1,0 +1,112 @@
+﻿using Discord;
+using Discord.WebSocket;
+using System;
+using System.Threading.Tasks;
+
+namespace PinnedBotApp
+{
+    /// <summary> PinnedBot class. </summary>
+    internal sealed class PinnedBot
+    {
+        /// <summary> The client </summary>
+        private readonly DiscordSocketClient client;
+
+        /// <summary> The token </summary>
+        private readonly string token;
+
+        /// <summary> Initializes a new instance of the <see cref="PinnedBot" /> class. </summary>
+        /// <param name="token"> The token. </param>
+        public PinnedBot(string token)
+        {
+            this.token = token;
+
+            client = new DiscordSocketClient();
+
+            client.Log += OnLog;
+            client.Ready += OnReady;
+
+            client.ReactionAdded += OnReactionAddedAsync;
+            client.ReactionRemoved += OnReactionRemovedAsync;
+        }
+
+        /// <summary> Runs the asynchronous. </summary>
+        public async Task RunAsync()
+        {
+            await client.LoginAsync(TokenType.Bot, token);
+            await client.StartAsync();
+
+            await Task.Delay(-1);
+        }
+
+        /// <summary> Called when [log]. </summary>
+        /// <param name="log"> The log. </param>
+        /// <returns> </returns>
+        private Task OnLog(LogMessage log)
+        {
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd} : {log}");
+            return Task.CompletedTask;
+        }
+
+        /// <summary> Called when [reaction added asynchronous]. </summary>
+        /// <param name="cachedMessage"> The cached message. </param>
+        /// <param name="cachedChannel"> The cached channel. </param>
+        /// <param name="reaction"> The reaction. </param>
+        private async Task OnReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
+        {
+            // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを行う
+            if (reaction.Emote.Name != "📌")
+            {
+                return;
+            }
+
+            var message = await cachedMessage.GetOrDownloadAsync();
+            if (message is null)
+            {
+                return;
+            }
+
+            // ボットが追加したリアクションでないことを確認
+            if (message.Author.IsBot)
+            {
+                return;
+            }
+
+            await message.PinAsync();
+        }
+
+        /// <summary> Called when [reaction removed asynchronous]. </summary>
+        /// <param name="cachedMessage"> The cached message. </param>
+        /// <param name="cachedChannel"> The cached channel. </param>
+        /// <param name="reaction"> The reaction. </param>
+        private async Task OnReactionRemovedAsync(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
+        {
+            // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを解除する
+            if (reaction.Emote.Name != "📌")
+            {
+                return;
+            }
+
+            var message = await cachedMessage.GetOrDownloadAsync();
+            if (message is null)
+            {
+                return;
+            }
+
+            // ボットが追加したリアクションでないことを確認
+            if (message.Author.IsBot)
+            {
+                return;
+            }
+
+            await message.UnpinAsync();
+        }
+
+        /// <summary> Called when [ready]. </summary>
+        /// <returns> </returns>
+        private Task OnReady()
+        {
+            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd} :  is Running!!");
+            return Task.CompletedTask;
+        }
+    }
+}
