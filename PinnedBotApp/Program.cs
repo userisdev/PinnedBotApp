@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace PinnedBotApp
@@ -17,6 +20,14 @@ namespace PinnedBotApp
                 Console.WriteLine("token error.");
                 Environment.Exit(1);
             }
+
+            string execPath = Assembly.GetExecutingAssembly().Location;
+            string dirPath = Path.GetDirectoryName(execPath);
+            string execNameWithoutExtension = Path.GetFileNameWithoutExtension(execPath);
+            string logFilePath = Path.Combine(dirPath, $"{execNameWithoutExtension}.log");
+            Trace.Listeners.Clear();
+            _ = Trace.Listeners.Add(new TextWriterTraceListener(logFilePath, "LogFile"));
+            _ = Trace.Listeners.Add(new ConsoleTraceListener());
 
             PinnedBot bot = new PinnedBot(token);
             await bot.RunAsync();

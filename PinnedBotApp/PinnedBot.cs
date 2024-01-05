@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,7 +46,8 @@ namespace PinnedBotApp
         /// <returns> </returns>
         private Task OnLog(LogMessage log)
         {
-            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : {log.Message}");
+            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : {log.Message}");
+            Trace.Flush();
             return Task.CompletedTask;
         }
 
@@ -71,12 +73,14 @@ namespace PinnedBotApp
                     foreach (IUser user in users)
                     {
                         await message.RemoveReactionAsync(emoji, user);
-                        Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : removed {emoji.Name}/{user.Username}");
+                        Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : removed {emoji.Name}/{user.Username}");
+                        Trace.Flush();
                     }
                 }
 
                 await message.UnpinAsync();
-                Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : unpinned {message.Id}");
+                Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : unpinned {message.Id}");
+                Trace.Flush();
                 return;
             }
 
@@ -86,7 +90,8 @@ namespace PinnedBotApp
                 if (!message.IsPinned)
                 {
                     await message.PinAsync();
-                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : pinned {message.Id}");
+                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : pinned {message.Id}");
+                    Trace.Flush();
                 }
 
                 return;
@@ -112,13 +117,15 @@ namespace PinnedBotApp
                 foreach (IUser user in users)
                 {
                     await message.RemoveReactionAsync(reaction.Emote, user);
-                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : removed {reaction.Emote.Name}/{user.Username}");
+                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : removed {reaction.Emote.Name}/{user.Username}");
+                    Trace.Flush();
                 }
 
                 if (message.IsPinned)
                 {
                     await message.UnpinAsync();
-                    Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : unpinned {message.Id}");
+                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : unpinned {message.Id}");
+                    Trace.Flush();
                 }
 
                 return;
@@ -129,7 +136,8 @@ namespace PinnedBotApp
         /// <returns> </returns>
         private Task OnReady()
         {
-            Console.WriteLine($"{DateTime.Now:yyyy/MM/dd.fff} : is Running!!");
+            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : is Running!!");
+            Trace.Flush();
             return Task.CompletedTask;
         }
     }
