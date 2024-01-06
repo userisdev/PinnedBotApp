@@ -26,7 +26,6 @@ namespace PinnedBotApp
             client = new DiscordSocketClient();
 
             client.Log += OnLog;
-            client.Ready += OnReady;
 
             client.ReactionAdded += OnReactionAddedAsync;
             client.ReactionRemoved += OnReactionRemovedAsync;
@@ -41,13 +40,21 @@ namespace PinnedBotApp
             await Task.Delay(Timeout.Infinite);
         }
 
+        /// <summary> Generates the log text. </summary>
+        /// <param name="log"> The log. </param>
+        /// <returns> </returns>
+        private static string GenerateLogText(LogMessage log)
+        {
+            return $"{log.Source} {log.Message}";
+        }
+
         /// <summary> Called when [log]. </summary>
         /// <param name="log"> The log. </param>
         /// <returns> </returns>
         private Task OnLog(LogMessage log)
         {
-            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : {log.Message}");
-            Trace.Flush();
+            string text = GenerateLogText(log);
+            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : {text}");
             return Task.CompletedTask;
         }
 
@@ -73,14 +80,12 @@ namespace PinnedBotApp
                     foreach (IUser user in users)
                     {
                         await message.RemoveReactionAsync(emoji, user);
-                        Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : removed {emoji.Name}/{user.Username}");
-                        Trace.Flush();
+                        Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> removed {emoji.Name}/{user.Username}");
                     }
                 }
 
                 await message.UnpinAsync();
-                Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : unpinned {message.Id}");
-                Trace.Flush();
+                Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> unpinned {message.Id}");
                 return;
             }
 
@@ -90,8 +95,7 @@ namespace PinnedBotApp
                 if (!message.IsPinned)
                 {
                     await message.PinAsync();
-                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : pinned {message.Id}");
-                    Trace.Flush();
+                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> pinned {message.Id}");
                 }
 
                 return;
@@ -117,28 +121,17 @@ namespace PinnedBotApp
                 foreach (IUser user in users)
                 {
                     await message.RemoveReactionAsync(reaction.Emote, user);
-                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : removed {reaction.Emote.Name}/{user.Username}");
-                    Trace.Flush();
+                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> removed {reaction.Emote.Name}/{user.Username}");
                 }
 
                 if (message.IsPinned)
                 {
                     await message.UnpinAsync();
-                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : unpinned {message.Id}");
-                    Trace.Flush();
+                    Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> unpinned {message.Id}");
                 }
 
                 return;
             }
-        }
-
-        /// <summary> Called when [ready]. </summary>
-        /// <returns> </returns>
-        private Task OnReady()
-        {
-            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : is Running!!");
-            Trace.Flush();
-            return Task.CompletedTask;
         }
     }
 }

@@ -28,6 +28,7 @@ namespace PinnedBotApp
             Trace.Listeners.Clear();
             _ = Trace.Listeners.Add(new TextWriterTraceListener(logFilePath, "LogFile"));
             _ = Trace.Listeners.Add(new ConsoleTraceListener());
+            Trace.AutoFlush = true;
 
             PinnedBot bot = new PinnedBot(token);
             await bot.RunAsync();
