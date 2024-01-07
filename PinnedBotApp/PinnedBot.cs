@@ -70,6 +70,8 @@ namespace PinnedBotApp
                 return;
             }
 
+            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> added {reaction.Emote.Name}/{reaction.User}");
+
             // 強制削除機能
             if (reaction.Emote.Name == "🔨")
             {
@@ -113,6 +115,8 @@ namespace PinnedBotApp
             {
                 return;
             }
+
+            Trace.WriteLine($"{DateTime.Now:yyyy/MM/dd HH:mm:ss.fff} : >> removed {reaction.Emote.Name}/{reaction.User}");
 
             // リアクションが特定の絵文字であり、特定のメッセージに付いたものであればピン留めを解除する
             if (reaction.Emote.Name == "📌")
