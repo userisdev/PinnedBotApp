@@ -26,6 +26,7 @@ namespace PinnedBotApp
             client = new DiscordSocketClient();
 
             client.Log += OnLog;
+            client.Ready += OnReady;
 
             client.ReactionAdded += OnReactionAddedAsync;
             client.ReactionRemoved += OnReactionRemovedAsync;
@@ -136,6 +137,12 @@ namespace PinnedBotApp
 
                 return;
             }
+        }
+
+        /// <summary> Called when [ready]. </summary>
+        private async Task OnReady()
+        {
+            await client.SetGameAsync("リアクション", type: ActivityType.Watching);
         }
     }
 }
